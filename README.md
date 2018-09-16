@@ -1,2 +1,7 @@
 # udf-tool
-upload and download file tool
+　　udf 起始代表着upload and download file. 最近我在学java socket编程和Java IO, 所以用这个项目来练练手, 
+目前我已经实现了client上传指定文件到服务器的功能, 也支持多个客户端同时上传文件(我用了线程池), 未
+来会支持client的参数输入, 做到支持文件下载, 文件夹的上传和下载.  也考虑在未来支持上传下载文件权限校验, 传
+输加密, 用NIO替换IO.    
+ 　　起始说白了，这个项目就是重复造轮子，最终100%完成版也就是个拙劣版的ftps, 其实我不求什么, 就是练练手而已, 
+ 我会在我的[CSDN博客](https://blog.csdn.net/xindoo)上记录下整个开发的过程, 有兴趣的同学可以关注下.    
