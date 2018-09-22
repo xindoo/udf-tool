@@ -1,54 +1,132 @@
 package me.xindoo.udftool.client;
 
-import java.io.BufferedReader;
+import com.alibaba.fastjson.JSONObject;
+import me.xindoo.udftool.common.UDFConstant;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Scanner;
 
+import static me.xindoo.udftool.common.UDFConstant.*;
 
 public class Client {
-    public static void test() throws IOException {
-        Scanner scanner = new Scanner(System.in);
+    private static Options options;
+    static  {
+        options = new Options();
+        Option upload = OptionBuilder.withArgName( "filename")
+                .withLongOpt("put")
+                .hasArg()
+                .withDescription(  "Upload file from local to service")
+                .create( "u");
+        Option download = OptionBuilder.withArgName( "filename")
+                .withLongOpt("get")
+                .hasArg()
+                .withDescription(  "Download file from l service to local")
+                .create( "d");
+
+        options.addOption( "h", "help", false,"help");
+        options.addOption(upload);
+        options.addOption(download);
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp( "udf", options );
+    }
+
+    public static void upLoad(String fileName) throws IOException {
         Socket socket = null;
         try {
-            socket = new Socket("47.75.177.135", 9999);
+            socket = new Socket("127.0.0.1", 9999);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        JSONObject json = new JSONObject();
+        json.put(TYPE, UPLOAD);
+        json.put(FILE_NAME, "QQ_V6.5.1.dmg");
+        InputStream fileInputStream = new FileInputStream(fileName);
 
-        InputStream inputStream = new FileInputStream("/Users/xindoo/Downloads/windows95.zip");
+        OutputStream socketOutputStream = socket.getOutputStream();
+        byte b[] = new byte[UDFConstant.BUFFER_SIZE];
+        //Send upload signal
+        socketOutputStream.write(json.toString().getBytes());
+        socketOutputStream.flush();
 
-        OutputStream outputStream = socket.getOutputStream();
-        byte b[] = new byte[1024];
-        int cnt = 1;
-        long all = inputStream.available();
-        System.out.println(all);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        outputStream.write("test.zip\n".getBytes());
-        outputStream.flush();
-        while (inputStream.read(b) > 0) {
-            cnt++;
-            if (cnt%100 == 0) {
-
-                System.out.println(" " +(1.0- (inputStream.available()*1.0)/all) * 100 + "%");
-            }
-            outputStream.write(b);
-            outputStream.flush();
+        //Send data
+        int len = 0;
+        while ((len = fileInputStream.read(b)) > 0) {
+            socketOutputStream.write(b, 0, len);
+            socketOutputStream.flush();
         }
-        inputStream.close();
-        outputStream.close();
+        fileInputStream.close();
+        socketOutputStream.close();
         socket.close();
         System.out.println("finished");
     }
-    public static void main(String[] args) {
+
+    public static void downLoad(String fileName) throws IOException {
+        Socket socket = null;
         try {
-            test();
+            socket = new Socket("127.0.0.1", 9999);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        JSONObject json = new JSONObject();
+        json.put(TYPE, DOWNLOAD);
+        json.put(FILE_NAME, "QQ_V6.5.1.dmg");
+        OutputStream socketOutputStream = socket.getOutputStream();
+        byte b[] = new byte[UDFConstant.BUFFER_SIZE];
+        //Send download signal
+        socketOutputStream.write(json.toString().getBytes());
+        socketOutputStream.flush();
+
+        //Write binary stream to local disk
+        InputStream socketInputStream = socket.getInputStream();
+        OutputStream fileOutputStream = new FileOutputStream(PATH_PREFIX+"downLoad/"+fileName);
+        int l = 0;
+        while ((l = socketInputStream.read(b)) > 0) {
+            fileOutputStream.write(b, 0, l);
+            fileOutputStream.flush();
+        }
+        fileOutputStream.close();
+        socketInputStream.close();
+        socketOutputStream.close();
+        socket.close();
+        System.out.println("finished");
+    }
+
+    public static void main(String[] args) {
+//        args = new String[]{"--get", "/Users/xindoo/Downloads/QQ_V6.5.1.dmg"};
+        CommandLineParser parser = new DefaultParser();
+        try {
+            // parse the command line arguments
+            CommandLine line = parser.parse( options, args);
+            if (line.hasOption("u")) {
+                String filname = line.getOptionValue("u");
+                try {
+                    upLoad(filname);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else if(line.hasOption("get")) {
+                String filname = line.getOptionValue("d");
+                try {
+                    downLoad("QQ_V6.5.1.dmg");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        catch( ParseException exp ) {
+            System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
         }
     }
 }
