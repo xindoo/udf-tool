@@ -1,4 +1,4 @@
-package me.xindoo.udftool.client;
+package me.xindoo.udftool.io.client;
 
 import com.alibaba.fastjson.JSONObject;
 import me.xindoo.udftool.common.UDFConstant;
@@ -45,7 +45,7 @@ public class Client {
     public static void upLoad(String fileName) throws IOException {
         Socket socket = null;
         try {
-            socket = new Socket("127.0.0.1", 9999);
+            socket = new Socket("127.0.0.1", PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,7 +75,7 @@ public class Client {
     public static void downLoad(String fileName) throws IOException {
         Socket socket = null;
         try {
-            socket = new Socket("127.0.0.1", 9999);
+            socket = new Socket("127.0.0.1", PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }

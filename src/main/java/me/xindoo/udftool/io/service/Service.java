@@ -1,4 +1,4 @@
-package me.xindoo.udftool.service;
+package me.xindoo.udftool.io.service;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -87,7 +87,7 @@ public class Service implements Runnable{
                 1L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(), threadFactory);
         try {
-            serverSocket = new ServerSocket(9999);
+            serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
