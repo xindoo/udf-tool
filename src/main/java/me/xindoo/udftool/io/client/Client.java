@@ -1,4 +1,4 @@
-package me.xindoo.udftool.client;
+package me.xindoo.udftool.io.client;
 
 import com.alibaba.fastjson.JSONObject;
 import me.xindoo.udftool.common.UDFConstant;
@@ -22,30 +22,31 @@ import static me.xindoo.udftool.common.UDFConstant.*;
 
 public class Client {
     private static Options options;
-    static  {
+
+    static {
         options = new Options();
-        Option upload = OptionBuilder.withArgName( "filename")
+        Option upload = OptionBuilder.withArgName("filename")
                 .withLongOpt("put")
                 .hasArg()
-                .withDescription(  "Upload file from local to service")
-                .create( "u");
-        Option download = OptionBuilder.withArgName( "filename")
+                .withDescription("Upload file from local to service")
+                .create("u");
+        Option download = OptionBuilder.withArgName("filename")
                 .withLongOpt("get")
                 .hasArg()
-                .withDescription(  "Download file from l service to local")
-                .create( "d");
+                .withDescription("Download file from l service to local")
+                .create("d");
 
-        options.addOption( "h", "help", false,"help");
+        options.addOption("h", "help", false, "help");
         options.addOption(upload);
         options.addOption(download);
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp( "udf", options );
+        formatter.printHelp("udf", options);
     }
 
     public static void upLoad(String fileName) throws IOException {
         Socket socket = null;
         try {
-            socket = new Socket("127.0.0.1", 9999);
+            socket = new Socket("127.0.0.1", PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,7 +76,7 @@ public class Client {
     public static void downLoad(String fileName) throws IOException {
         Socket socket = null;
         try {
-            socket = new Socket("127.0.0.1", 9999);
+            socket = new Socket("127.0.0.1", PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,7 +91,7 @@ public class Client {
 
         //Write binary stream to local disk
         InputStream socketInputStream = socket.getInputStream();
-        OutputStream fileOutputStream = new FileOutputStream(PATH_PREFIX+"downLoad/"+fileName);
+        OutputStream fileOutputStream = new FileOutputStream(PATH_PREFIX + "downLoad/" + fileName);
         int l = 0;
         while ((l = socketInputStream.read(b)) > 0) {
             fileOutputStream.write(b, 0, l);
@@ -108,7 +109,7 @@ public class Client {
         CommandLineParser parser = new DefaultParser();
         try {
             // parse the command line arguments
-            CommandLine line = parser.parse( options, args);
+            CommandLine line = parser.parse(options, args);
             if (line.hasOption("u")) {
                 String filname = line.getOptionValue("u");
                 try {
@@ -116,7 +117,7 @@ public class Client {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else if(line.hasOption("get")) {
+            } else if (line.hasOption("get")) {
                 String filname = line.getOptionValue("d");
                 try {
                     downLoad("QQ_V6.5.1.dmg");
@@ -124,9 +125,8 @@ public class Client {
                     e.printStackTrace();
                 }
             }
-        }
-        catch( ParseException exp ) {
-            System.err.println( "Parsing failed.  Reason: " + exp.getMessage() );
+        } catch (ParseException exp) {
+            System.err.println("Parsing failed.  Reason: " + exp.getMessage());
         }
     }
 }

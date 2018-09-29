@@ -1,4 +1,4 @@
-package me.xindoo.udftool.service;
+package me.xindoo.udftool.io.service;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -18,11 +18,12 @@ import java.util.concurrent.TimeUnit;
 
 import static me.xindoo.udftool.common.UDFConstant.*;
 
-public class Service implements Runnable{
+public class Service implements Runnable {
     private InputStream inputStream;
     private OutputStream outputStream;
     private byte[] b = new byte[BUFFER_SIZE];
     private Socket socket;
+
     public Service(Socket socket) {
         this.socket = socket;
     }
@@ -45,7 +46,7 @@ public class Service implements Runnable{
 
     private void upLoad(String fileName) {
         try {
-            outputStream = new FileOutputStream(PATH_PREFIX+fileName);
+            outputStream = new FileOutputStream(PATH_PREFIX + fileName);
             int len = 0;
             while ((len = inputStream.read(b)) > 0) {
                 outputStream.write(b, 0, len);
@@ -68,7 +69,7 @@ public class Service implements Runnable{
             String type = json.getString(TYPE);
             if (UPLOAD.equals(type)) {
                 upLoad(json.getString(FILE_NAME));
-            } else if(DOWNLOAD.equals(type)) {
+            } else if (DOWNLOAD.equals(type)) {
                 downLoad(json.getString(FILE_NAME));
             } else {
                 System.out.println("Impossible to be here");
@@ -83,11 +84,11 @@ public class Service implements Runnable{
     public static void startService() throws IOException {
         ServerSocket serverSocket = null;
         ThreadFactory threadFactory = Executors.defaultThreadFactory();
-        ExecutorService threadPool = new ThreadPoolExecutor( 10, 100,
+        ExecutorService threadPool = new ThreadPoolExecutor(10, 100,
                 1L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(), threadFactory);
         try {
-            serverSocket = new ServerSocket(9999);
+            serverSocket = new ServerSocket(PORT);
         } catch (IOException e) {
             e.printStackTrace();
         }
